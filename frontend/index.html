@@ -745,7 +745,16 @@ async function registerMentor() {
 // ═══════════════════════════════════════════════════════
 //  ADMIN PANEL
 // ═══════════════════════════════════════════════════════
-function showAdmin() { document.getElementById("adminModal").classList.remove("hidden"); document.getElementById("adminModal").classList.add("flex"); adminTab("bookings"); }
+function showAdmin() {
+  const pass = prompt("Admin Password:");
+  if(pass !== "IITP@Aditya2026#") {
+    alert("Wrong password!");
+    return;
+  }
+  document.getElementById("adminModal").classList.remove("hidden");
+  document.getElementById("adminModal").classList.add("flex");
+  adminTab("bookings");
+}
 function hideAdmin() { document.getElementById("adminModal").classList.add("hidden"); document.getElementById("adminModal").classList.remove("flex"); }
 
 function adminTab(tab) {
