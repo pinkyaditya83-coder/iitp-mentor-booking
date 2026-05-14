@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IITP Hybrid Navigator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes pulse-glow{0%,100%{box-shadow:0 0 20px #facc1540}50%{box-shadow:0 0 40px #facc1599}}
+  @keyframes shimmer{0%{background-position:-200%}100%{background-position:200%}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .float{animation:float 3s ease-in-out infinite}
+  .pulse-glow{animation:pulse-glow 2s ease-in-out infinite}
+  .glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1)}
+  .shimmer-btn{background:linear-gradient(90deg,#003366,#1d4ed8,#003366);background-size:200%;animation:shimmer 2s linear infinite}
+  .card-hover{transition:all 0.3s ease}.card-hover:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,0.4)}
+  .mentor-selected{border-color:#facc15!important;box-shadow:0 0 30px #facc1560}
+  .tab-active{background:#facc15;color:#003366}
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0a0f1e}::-webkit-scrollbar-thumb{background:#facc15;border-radius:3px}
+  .neon-text{text-shadow:0 0 20px #facc15,0 0 40px #facc1580}
+  .hero-bg{background:radial-gradient(ellipse at 20% 50%,#1d4ed820 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,#facc1510 0%,transparent 50%),#0a0f1e}
+  input,select,textarea{color-scheme:dark}
+  .spinner{animation:spin 1s linear infinite}
+  .msg-in{animation:fadeIn 0.3s ease}
+  .chat-bubble-student{background:linear-gradient(135deg,#1d4ed8,#2563eb);border-radius:18px 18px 4px 18px}
+  .chat-bubble-mentor{background:linear-gradient(135deg,#1e293b,#334155);border-radius:18px 18px 18px 4px}
+  .tag-blue{background:rgba(59,130,246,0.2);color:#93c5fd;border:1px solid rgba(59,130,246,0.3)}
+  .tag-green{background:rgba(34,197,94,0.2);color:#86efac;border:1px solid rgba(34,197,94,0.3)}
+  .tag-yellow{background:rgba(234,179,8,0.2);color:#fde047;border:1px solid rgba(234,179,8,0.3)}
+  .tag-purple{background:rgba(168,85,247,0.2);color:#d8b4fe;border:1px solid rgba(168,85,247,0.3)}
+  .tag-red{background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
+</style>
+</head>
+<body class="bg-[#0a0f1e] text-white font-sans overflow-x-hidden">
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="fixed top-0 w-full z-50 glass border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <!-- LOGO -->
+    <div class="flex items-center gap-3">
+      <div class="relative w-10 h-10">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-10 h-10">
+          <rect width="40" height="40" rx="10" fill="#facc15"/>
+          <path d="M8 28 L20 10 L32 28" stroke="#003366" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M13 22 L27 22" stroke="#003366" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="20" cy="10" r="2.5" fill="#003366"/>
+        </svg>
+      </div>
+      <div>
+        <p class="font-black text-base leading-tight">IITP <span class="text-yellow-400">Navigator</span></p>
+        <p class="text-[9px] text-slate-400 leading-tight">IIT Patna BS AICS</p>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+      <a href="#demo" class="hover:text-yellow-400 transition">Demo</a>
+      <a href="#mentors" class="hover:text-yellow-400 transition">Mentors</a>
+      <a href="#planner" class="hover:text-yellow-400 transition">ROI Planner</a>
+      <a href="#register-mentor" class="hover:text-yellow-400 transition">Become Mentor</a>
+    </div>
+    <button onclick="showAdmin()" class="text-xs glass px-4 py-2 rounded-full hover:bg-yellow-400 hover:text-[#003366] transition font-bold">
+      <i class="fas fa-shield-alt mr-1"></i> Admin
+    </button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero-bg min-h-screen flex items-center pt-20 px-6 relative overflow-hidden">
+  <div class="absolute inset-0 opacity-5" style="background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:60px 60px"></div>
+  <div class="absolute top-1/4 right-1/4 w-72 h-72 bg-yellow-400/10 rounded-full blur-3xl float"></div>
+  <div class="max-w-7xl mx-auto w-full relative z-10">
+    <div class="max-w-3xl">
+      <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full text-xs font-bold text-yellow-400 mb-8 pulse-glow">
+        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        India's Premier Hybrid IIT Degree Program
+      </div>
+      <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6">IITP Hybrid<br><span class="text-yellow-400 neon-text">Navigator</span></h1>
+      <p class="text-slate-400 text-xl mb-4 font-medium">Value for money hai ya nahi?</p>
+      <p class="text-slate-500 text-lg mb-10">Real seniors se pucho — honest answers, 1-on-1 consultation, zero BS.</p>
+      <div class="flex flex-wrap gap-4">
+        <a href="#mentors" class="shimmer-btn text-white px-8 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-transform shadow-2xl"><i class="fas fa-search mr-2"></i>Find a Mentor</a>
+        <a href="#register-mentor" class="glass border border-yellow-400/50 text-yellow-400 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-yellow-400/10 transition"><i class="fas fa-user-plus mr-2"></i>Become a Mentor</a>
+      </div>
+      <div class="mt-16 flex flex-wrap gap-10">
+        <div><p class="text-3xl font-black text-yellow-400" id="stat-mentors">0</p><p class="text-slate-500 text-sm">Active Mentors</p></div>
+        <div><p class="text-3xl font-black text-green-400" id="stat-sessions">0</p><p class="text-slate-500 text-sm">Sessions Done</p></div>
+        <div><p class="text-3xl font-black text-blue-400">₹50</p><p class="text-slate-500 text-sm">Per Consultation</p></div>
+        <div><p class="text-3xl font-black text-purple-400">100%</p><p class="text-slate-500 text-sm">Real Seniors</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEMO VIDEOS (Dynamic from DB) ═══ -->
+<section id="demo" class="py-24 px-6 bg-[#0d1424]">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-3">See Before You Decide</p>
+      <h2 class="text-4xl font-black">Demo Lectures <span class="text-yellow-400">Preview</span></h2>
+    </div>
+    <div id="demoGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="col-span-full text-center py-16 text-slate-500">
+        <i class="fas fa-spinner spinner text-3xl text-yellow-400 mb-4 block"></i>
+        <p>Loading lectures...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ROI PLANNER ═══ -->
+<section id="planner" class="py-24 px-6 bg-[#0a0f1e] relative overflow-hidden">
+  <div class="absolute inset-0 opacity-5" style="background-image:radial-gradient(circle,#facc15 1px,transparent 1px);background-size:40px 40px"></div>
+  <div class="max-w-6xl mx-auto relative z-10">
+    <div class="text-center mb-16">
+      <p class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-3">Futuristic Decision Tool</p>
+      <h2 class="text-4xl font-black">Career & Time <span class="text-yellow-400">Command Center</span></h2>
+    </div>
+    <div class="flex justify-center mb-10">
+      <div class="glass rounded-2xl p-1 flex gap-1">
+        <button onclick="switchTab('roi')" id="tab-roi" class="tab-active px-6 py-3 rounded-xl font-bold text-sm transition-all">💰 ROI</button>
+        <button onclick="switchTab('time')" id="tab-time" class="px-6 py-3 rounded-xl font-bold text-sm transition-all text-slate-400">⏳ Time</button>
+        <button onclick="switchTab('compare')" id="tab-compare" class="px-6 py-3 rounded-xl font-bold text-sm transition-all text-slate-400">📊 Compare</button>
+      </div>
+    </div>
+    <!-- ROI Panel -->
+    <div id="panel-roi">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="glass rounded-3xl p-8 border border-white/10">
+          <h3 class="text-xl font-bold text-green-400 mb-6">💰 Investment vs Return</h3>
+          <div class="space-y-6">
+            <div>
+              <label class="block text-sm font-bold text-slate-400 mb-3">Current College Tier</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button onclick="setTier(this,'3')" class="tier-btn glass border border-white/20 rounded-xl p-4 text-center hover:border-yellow-400 transition font-bold text-sm"><div class="text-2xl mb-1">🏫</div>Tier 3<div class="text-xs text-slate-500 mt-1">Local Private</div></button>
+                <button onclick="setTier(this,'5')" class="tier-btn glass border border-yellow-400 bg-yellow-400/10 rounded-xl p-4 text-center transition font-bold text-sm"><div class="text-2xl mb-1">🎓</div>Tier 2<div class="text-xs text-slate-500 mt-1">State Govt</div></button>
+                <button onclick="setTier(this,'8')" class="tier-btn glass border border-white/20 rounded-xl p-4 text-center hover:border-yellow-400 transition font-bold text-sm"><div class="text-2xl mb-1">🏆</div>Tier 1<div class="text-xs text-slate-500 mt-1">NIT/IIT</div></button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-400 mb-2">Study Commitment</label>
+              <input type="range" id="studySlider" min="1" max="6" value="3" oninput="updateROI()" class="w-full h-2 rounded-lg appearance-none cursor-pointer accent-yellow-400">
+              <div class="flex justify-between text-xs text-slate-500 mt-1"><span>1hr</span><span id="studyVal" class="text-yellow-400 font-bold">3 hrs/day</span><span>6hrs</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="glass rounded-3xl p-8 border border-white/10 flex flex-col justify-between">
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-widest mb-2">Projected Outcome</p>
+            <h4 class="text-5xl font-black mb-2" id="roiMain">₹12-18 LPA</h4>
+            <p class="text-green-400 font-bold" id="roiSub">Expected CTC after degree</p>
+          </div>
+          <div class="mt-6 space-y-4">
+            <div><div class="flex justify-between text-sm mb-1"><span class="text-slate-400">Current Path</span><span id="curPath" class="font-bold">₹5 LPA</span></div><div class="h-2 bg-slate-700 rounded-full"><div id="curBar" class="h-2 bg-slate-500 rounded-full transition-all duration-700" style="width:25%"></div></div></div>
+            <div><div class="flex justify-between text-sm mb-1"><span class="text-slate-400">With IIT Patna</span><span id="newPath" class="text-yellow-400 font-bold">₹15 LPA</span></div><div class="h-2 bg-slate-700 rounded-full"><div id="newBar" class="h-2 bg-yellow-400 rounded-full transition-all duration-700" style="width:75%"></div></div></div>
+            <div><div class="flex justify-between text-sm mb-1"><span class="text-slate-400">ROI Timeline</span><span id="roiTimeline" class="text-green-400 font-bold">~8 months</span></div><div class="h-2 bg-slate-700 rounded-full"><div id="roiBar" class="h-2 bg-green-400 rounded-full transition-all duration-700" style="width:60%"></div></div></div>
+          </div>
+          <div class="mt-4 p-4 bg-yellow-400/10 border border-yellow-400/30 rounded-2xl text-center">
+            <p class="text-yellow-400 font-black text-2xl" id="roiEmoji">📈 High ROI</p>
+            <p class="text-slate-400 text-sm mt-1" id="roiComment">Best time to enroll!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Time Panel -->
+    <div id="panel-time" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="glass rounded-3xl p-8 border border-white/10">
+          <h3 class="text-xl font-bold text-blue-400 mb-6">⏳ 24-Hour Life Designer</h3>
+          <div class="space-y-6">
+            <div><label class="block text-sm font-bold text-slate-400 mb-2">Offline College (hrs/day)</label><input type="range" id="offSlider" min="0" max="10" value="6" oninput="updateTime()" class="w-full h-2 rounded-lg appearance-none cursor-pointer accent-blue-500"><div class="flex justify-between text-xs mt-1 text-slate-500"><span>0</span><span id="offVal" class="text-blue-400 font-bold">6 hrs</span><span>10</span></div></div>
+            <div><label class="block text-sm font-bold text-slate-400 mb-2">Sleep (hrs/day)</label><input type="range" id="sleepSlider" min="5" max="10" value="7" oninput="updateTime()" class="w-full h-2 rounded-lg appearance-none cursor-pointer accent-purple-500"><div class="flex justify-between text-xs mt-1 text-slate-500"><span>5</span><span id="sleepVal" class="text-purple-400 font-bold">7 hrs</span><span>10</span></div></div>
+            <div><label class="block text-sm font-bold text-slate-400 mb-2">Travel + Misc (hrs/day)</label><input type="range" id="travelSlider" min="0" max="4" value="2" oninput="updateTime()" class="w-full h-2 rounded-lg appearance-none cursor-pointer accent-orange-500"><div class="flex justify-between text-xs mt-1 text-slate-500"><span>0</span><span id="travelVal" class="text-orange-400 font-bold">2 hrs</span><span>4</span></div></div>
+          </div>
+        </div>
+        <div class="glass rounded-3xl p-8 border border-white/10">
+          <p class="text-xs text-slate-500 uppercase tracking-widest mb-4">Daily Breakdown</p>
+          <div class="space-y-3 mb-6">
+            <div class="flex items-center gap-3"><div class="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0"></div><div class="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden"><div id="bar-college" class="h-4 bg-blue-500 rounded-full transition-all duration-700" style="width:25%"></div></div><span id="lbl-college" class="text-blue-400 font-bold text-sm w-14 text-right">6 hrs</span></div>
+            <div class="flex items-center gap-3"><div class="w-3 h-3 bg-purple-500 rounded-full flex-shrink-0"></div><div class="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden"><div id="bar-sleep" class="h-4 bg-purple-500 rounded-full transition-all duration-700" style="width:29%"></div></div><span id="lbl-sleep" class="text-purple-400 font-bold text-sm w-14 text-right">7 hrs</span></div>
+            <div class="flex items-center gap-3"><div class="w-3 h-3 bg-orange-500 rounded-full flex-shrink-0"></div><div class="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden"><div id="bar-travel" class="h-4 bg-orange-500 rounded-full transition-all duration-700" style="width:8%"></div></div><span id="lbl-travel" class="text-orange-400 font-bold text-sm w-14 text-right">2 hrs</span></div>
+            <div class="flex items-center gap-3"><div class="w-3 h-3 bg-green-400 rounded-full flex-shrink-0"></div><div class="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden"><div id="bar-free" class="h-4 bg-green-400 rounded-full transition-all duration-700" style="width:37%"></div></div><span id="lbl-free" class="text-green-400 font-bold text-sm w-14 text-right">9 hrs</span></div>
+          </div>
+          <div class="p-5 rounded-2xl text-center bg-green-400/10 border border-green-400/30">
+            <p class="text-4xl font-black text-green-400" id="freeTimeResult">9 hrs free</p>
+            <p class="font-bold mt-1 text-green-300" id="timeVerdict">Excellent! Take 4 courses</p>
+            <p class="text-slate-500 text-xs mt-2" id="courseRec">Recommended: 4 courses/semester</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Compare Panel -->
+    <div id="panel-compare" class="hidden">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass rounded-3xl p-8 border border-red-500/30"><p class="text-red-400 font-bold text-sm uppercase tracking-widest mb-4">❌ Without IIT Patna</p><div class="space-y-3 text-sm"><div class="flex justify-between"><span class="text-slate-400">Avg CTC</span><span class="text-red-400 font-bold">₹4-6 LPA</span></div><div class="flex justify-between"><span class="text-slate-400">Brand Value</span><span class="text-red-400 font-bold">Low</span></div><div class="flex justify-between"><span class="text-slate-400">MAANG Chance</span><span class="text-red-400 font-bold">Very Low</span></div><div class="flex justify-between"><span class="text-slate-400">Network</span><span class="text-red-400 font-bold">Limited</span></div></div></div>
+        <div class="glass rounded-3xl p-8 border border-yellow-400/50 relative"><div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-[#003366] text-xs font-black px-4 py-1 rounded-full">BEST PATH</div><p class="text-yellow-400 font-bold text-sm uppercase tracking-widest mb-4">🏆 Hybrid (Both)</p><div class="space-y-3 text-sm"><div class="flex justify-between"><span class="text-slate-400">Avg CTC</span><span class="text-yellow-400 font-bold">₹12-25 LPA</span></div><div class="flex justify-between"><span class="text-slate-400">Brand Value</span><span class="text-yellow-400 font-bold">IIT Level</span></div><div class="flex justify-between"><span class="text-slate-400">MAANG Chance</span><span class="text-yellow-400 font-bold">High</span></div><div class="flex justify-between"><span class="text-slate-400">Network</span><span class="text-yellow-400 font-bold">IIT Alumni</span></div></div></div>
+        <div class="glass rounded-3xl p-8 border border-blue-500/30"><p class="text-blue-400 font-bold text-sm uppercase tracking-widest mb-4">🎯 IIT Patna Only</p><div class="space-y-3 text-sm"><div class="flex justify-between"><span class="text-slate-400">Avg CTC</span><span class="text-blue-400 font-bold">₹8-18 LPA</span></div><div class="flex justify-between"><span class="text-slate-400">Brand Value</span><span class="text-blue-400 font-bold">IIT Level</span></div><div class="flex justify-between"><span class="text-slate-400">MAANG Chance</span><span class="text-blue-400 font-bold">Moderate</span></div><div class="flex justify-between"><span class="text-slate-400">Network</span><span class="text-blue-400 font-bold">Strong</span></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MENTORS SECTION ═══ -->
+<section id="mentors" class="py-24 px-6 bg-[#0d1424]">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-3">Real IIT Patna Seniors</p>
+      <h2 class="text-4xl font-black mb-4">Book a <span class="text-yellow-400">Mentor</span></h2>
+      <p class="text-slate-400">Select → Pay ₹50 → Meet link + Chat <b class="text-green-400">instantly auto!</b></p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-3 mb-12">
+      <button onclick="filterMentors('all',this)" class="filter-btn px-5 py-2 rounded-full glass border border-white/20 text-sm font-bold tab-active">All</button>
+      <button onclick="filterMentors('AI/ML',this)" class="filter-btn px-5 py-2 rounded-full glass border border-white/20 text-sm font-bold text-slate-400">🤖 AI/ML</button>
+      <button onclick="filterMentors('DSA',this)" class="filter-btn px-5 py-2 rounded-full glass border border-white/20 text-sm font-bold text-slate-400">💻 DSA</button>
+      <button onclick="filterMentors('Placement',this)" class="filter-btn px-5 py-2 rounded-full glass border border-white/20 text-sm font-bold text-slate-400">🎯 Placement</button>
+    </div>
+    <div id="mentorGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="col-span-full text-center py-16 text-slate-500"><i class="fas fa-spinner spinner text-3xl text-yellow-400 mb-4 block"></i><p>Loading mentors...</p></div>
+    </div>
+
+    <!-- Booking Form -->
+    <div id="bookingPanel" class="hidden mt-12 max-w-2xl mx-auto">
+      <div class="glass rounded-3xl p-8 border border-yellow-400/30">
+        <h3 class="text-2xl font-black mb-2">Book <span class="text-yellow-400" id="selectedMentorName">—</span></h3>
+        <p class="text-slate-400 text-sm mb-8">Pay ₹50 → Meet link + Chat room <b class="text-green-400">auto generate!</b></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label class="block text-sm font-bold text-slate-400 mb-2">Your Full Name</label><input id="bkName" type="text" placeholder="Rahul Kumar" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+          <div><label class="block text-sm font-bold text-slate-400 mb-2">Email Address</label><input id="bkEmail" type="email" placeholder="rahul@email.com" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+          <div><label class="block text-sm font-bold text-slate-400 mb-2">WhatsApp Number</label><input id="bkPhone" type="tel" placeholder="9876543210" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+          <div><label class="block text-sm font-bold text-slate-400 mb-2">Your Question</label><input id="bkQuery" type="text" placeholder="Is IITP worth it?" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+        </div>
+        <button onclick="initiateBooking()" class="w-full shimmer-btn mt-6 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-transform" id="bookBtn">
+          <i class="fas fa-calendar-check mr-2"></i> Proceed to Pay ₹50
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Success + Chat Access -->
+    <div id="paymentSuccess" class="hidden mt-12 max-w-lg mx-auto">
+      <div class="glass rounded-3xl p-10 border border-green-400/30 text-center">
+        <div class="text-7xl mb-5">🎉</div>
+        <h3 class="text-3xl font-black text-green-400 mb-3">Payment Done!</h3>
+        <p class="text-slate-400 mb-8">Meet link + Chat room generate ho raha hai...</p>
+        <div id="successLinks" class="hidden space-y-3">
+          <div class="bg-[#0f2d1a] border border-green-400/30 rounded-2xl p-4 mb-4 text-left">
+            <p class="text-green-400 text-xs uppercase tracking-widest mb-1">Your Private Google Meet</p>
+            <p id="meetLinkText" class="text-white text-sm font-mono break-all"></p>
+          </div>
+          <a id="meetLinkBtn" href="#" target="_blank" class="block bg-blue-600 hover:bg-blue-500 transition text-white text-center py-4 rounded-2xl font-black text-lg">🎥 Join Google Meet</a>
+          <button id="openChatBtn" onclick="openChatFromSuccess()" class="w-full bg-purple-600 hover:bg-purple-500 transition text-white py-4 rounded-2xl font-black text-lg">💬 Open Chat with Mentor</button>
+        </div>
+        <div id="waitingSpinner" class="flex items-center justify-center gap-3 text-slate-400">
+          <i class="fas fa-spinner spinner text-yellow-400"></i><span>Processing... Check email too!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MENTOR REGISTRATION ═══ -->
+<section id="register-mentor" class="py-24 px-6 bg-[#0a0f1e]">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="text-yellow-400 font-bold text-sm tracking-widest uppercase mb-3">IIT Patna Students</p>
+      <h2 class="text-4xl font-black">Become a <span class="text-yellow-400">Mentor</span></h2>
+      <p class="text-slate-400 mt-3">Register → Live instantly → Help juniors earn respect</p>
+    </div>
+    <div class="glass rounded-3xl p-10 border border-white/10">
+      <!-- Profile Photo Upload -->
+      <div class="text-center mb-8">
+        <div class="relative inline-block">
+          <div id="photoPreview" class="w-28 h-28 rounded-full mx-auto bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-4xl font-black border-4 border-white/20 overflow-hidden cursor-pointer" onclick="document.getElementById('photoInput').click()">
+            <i class="fas fa-camera text-white/60 text-3xl"></i>
+          </div>
+          <div class="absolute bottom-0 right-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center cursor-pointer" onclick="document.getElementById('photoInput').click()">
+            <i class="fas fa-plus text-[#003366] text-sm"></i>
+          </div>
+        </div>
+        <p class="text-slate-400 text-sm mt-3">Click to upload profile photo</p>
+        <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)">
+        <input type="hidden" id="mPhoto">
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div><label class="block text-sm font-bold text-slate-400 mb-2">Full Name *</label><input id="mName" type="text" placeholder="Your name" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+        <div><label class="block text-sm font-bold text-slate-400 mb-2">Email *</label><input id="mEmail" type="email" placeholder="iitpatna@gmail.com" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+        <div><label class="block text-sm font-bold text-slate-400 mb-2">WhatsApp *</label><input id="mPhone" type="tel" placeholder="9876543210" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+        <div><label class="block text-sm font-bold text-slate-400 mb-2">Current Year *</label><select id="mYear" class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white outline-none focus:border-yellow-400 transition bg-[#0a0f1e]"><option value="1st Year">1st Year</option><option value="2nd Year" selected>2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option><option value="Alumni">Alumni</option></select></div>
+        <div><label class="block text-sm font-bold text-slate-400 mb-2">Specialization *</label><input id="mSpec" type="text" placeholder="AI/ML, DSA, Placements..." class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+        <div><label class="block text-sm font-bold text-slate-400 mb-2">Courses You Guide</label><input id="mCourses" type="text" placeholder="DSA, ML, DBMS, OS..." class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition"></div>
+        <div class="col-span-full"><label class="block text-sm font-bold text-slate-400 mb-2">Short Bio</label><textarea id="mBio" rows="3" placeholder="Tell students about your journey..." class="w-full glass border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-yellow-400 outline-none transition resize-none"></textarea></div>
+      </div>
+      <button onclick="registerMentor()" class="w-full shimmer-btn mt-8 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-transform" id="regBtn">
+        <i class="fas fa-rocket mr-2"></i> Register & Go Live Instantly
+      </button>
+      <div id="regMsg" class="hidden mt-4 p-4 rounded-xl text-center font-bold"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CHAT MODAL ═══ -->
+<div id="chatModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="glass rounded-3xl border border-purple-500/30 w-full max-w-2xl flex flex-col" style="height:85vh">
+    <!-- Chat Header -->
+    <div class="flex items-center justify-between p-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div id="chatAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center font-black text-lg overflow-hidden"></div>
+        <div>
+          <p id="chatPartnerName" class="font-bold text-white"></p>
+          <p class="text-xs text-green-400">● Online</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a id="chatMeetLink" href="#" target="_blank" class="text-xs glass px-3 py-1.5 rounded-full text-blue-300 hover:text-white transition border border-blue-500/30">
+          <i class="fas fa-video mr-1"></i> Meet
+        </a>
+        <button onclick="hideChat()" class="w-9 h-9 glass rounded-full flex items-center justify-center hover:bg-red-500/20 transition">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Messages -->
+    <div id="chatMessages" class="flex-1 overflow-y-auto p-5 space-y-4">
+      <div class="text-center text-slate-500 text-sm py-8">
+        <i class="fas fa-spinner spinner text-purple-400 text-2xl mb-3 block"></i>
+        Loading messages...
+      </div>
+    </div>
+    <!-- Input -->
+    <div class="p-4 border-t border-white/10">
+      <div class="flex gap-3">
+        <input id="chatInput" type="text" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()"
+          class="flex-1 glass border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-slate-500 focus:border-purple-400 outline-none transition">
+        <button onclick="sendMessage()" class="w-12 h-12 bg-purple-600 hover:bg-purple-500 transition rounded-2xl flex items-center justify-center flex-shrink-0">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN MODAL ═══ -->
+<div id="adminModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="glass rounded-3xl border border-white/20 w-full max-w-5xl max-h-[92vh] overflow-y-auto p-8">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-2xl font-black">Admin <span class="text-yellow-400">Panel</span></h2>
+      <button onclick="hideAdmin()" class="w-10 h-10 glass rounded-full flex items-center justify-center hover:bg-red-500/20 transition"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="flex gap-2 mb-8 flex-wrap">
+      <button onclick="adminTab('bookings')" id="atab-bookings" class="admin-tab tab-active px-5 py-2 rounded-xl font-bold text-sm transition">📋 Bookings</button>
+      <button onclick="adminTab('demos')" id="atab-demos" class="admin-tab px-5 py-2 rounded-xl font-bold text-sm transition text-slate-400 glass border border-white/10">🎥 Demo Lectures</button>
+      <button onclick="adminTab('mentors')" id="atab-mentors" class="admin-tab px-5 py-2 rounded-xl font-bold text-sm transition text-slate-400 glass border border-white/10">👥 Mentors</button>
+    </div>
+
+    <!-- Bookings Tab -->
+    <div id="apanel-bookings">
+      <div id="adminBookingList"><p class="text-slate-400 text-center py-8"><i class="fas fa-spinner spinner mr-2"></i>Loading...</p></div>
+    </div>
+
+    <!-- Demo Lectures Tab -->
+    <div id="apanel-demos" class="hidden">
+      <!-- Add Demo Form -->
+      <div class="glass rounded-2xl p-6 border border-yellow-400/20 mb-6">
+        <h3 class="text-lg font-black text-yellow-400 mb-5"><i class="fas fa-plus mr-2"></i>Add New Demo Lecture</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">Video Title *</label><input id="dTitle" type="text" placeholder="English for Business Communication" class="w-full glass border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:border-yellow-400 outline-none text-sm"></div>
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">Instructor Name</label><input id="dInstructor" type="text" placeholder="Dr. Smith Singh (IIT Patna)" class="w-full glass border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:border-yellow-400 outline-none text-sm"></div>
+          <div class="col-span-full"><label class="block text-xs font-bold text-slate-400 mb-1">YouTube URL * (any format works)</label><input id="dUrl" type="url" placeholder="https://youtu.be/xxxxx OR https://www.youtube.com/watch?v=xxxxx" class="w-full glass border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:border-yellow-400 outline-none text-sm"></div>
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">Tags (comma separated)</label><input id="dTags" type="text" placeholder="LSRW Skills, 75% Attendance" class="w-full glass border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:border-yellow-400 outline-none text-sm"></div>
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">Tag Colors (blue/green/yellow/purple/red)</label><input id="dColors" type="text" placeholder="blue, green" class="w-full glass border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:border-yellow-400 outline-none text-sm"></div>
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">Display Order (0=first)</label><input id="dOrder" type="number" value="0" class="w-full glass border border-white/20 rounded-xl px-3 py-2.5 text-white focus:border-yellow-400 outline-none text-sm"></div>
+        </div>
+        <button onclick="addDemo()" class="mt-4 shimmer-btn px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform" id="addDemoBtn">
+          <i class="fas fa-plus mr-2"></i> Add Demo Lecture
+        </button>
+        <div id="demoMsg" class="hidden mt-3 p-3 rounded-xl text-sm font-bold text-center"></div>
+      </div>
+      <!-- Demo List -->
+      <div id="adminDemoList"><p class="text-slate-400 text-center py-8"><i class="fas fa-spinner spinner mr-2"></i>Loading...</p></div>
+    </div>
+
+    <!-- Mentors Tab -->
+    <div id="apanel-mentors" class="hidden">
+      <div id="adminMentorList"><p class="text-slate-400 text-center py-8"><i class="fas fa-spinner spinner mr-2"></i>Loading...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="bg-[#060a14] py-12 px-6 border-t border-white/10 text-center">
+  <div class="flex items-center justify-center gap-3 mb-4">
+    <svg viewBox="0 0 40 40" fill="none" class="w-8 h-8"><rect width="40" height="40" rx="10" fill="#facc15"/><path d="M8 28 L20 10 L32 28" stroke="#003366" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 22 L27 22" stroke="#003366" stroke-width="2.5" stroke-linecap="round"/><circle cx="20" cy="10" r="2.5" fill="#003366"/></svg>
+    <span class="font-black">IITP <span class="text-yellow-400">Navigator</span></span>
+  </div>
+  <p class="text-slate-600 text-sm">&copy; 2026 IIT Patna BS AICS Capstone Project — Made by Aditya</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+const API_BASE    = "http://localhost:5000"; // ← Change to Railway URL after deploy
+const RAZORPAY_KEY = "rzp_test_SoWtYEDJW9hWdU";
+
+let allMentors      = [];
+let selectedMentorId = null;
+let currentMongoId   = null;
+let currentTier      = "5";
+let pollInterval     = null;
+let currentChatRoom  = null;
+let currentChatRole  = null;
+let currentChatName  = null;
+let currentMeetLink  = null;
+let chatPollInterval = null;
+let lastMsgCount     = 0;
+
+// ── BOOT ───────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  loadDemos();
+  loadMentors();
+  updateROI();
+  updateTime();
+  // Check URL params for direct chat access
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("chat")) {
+    currentChatRoom = params.get("chat");
+    currentChatRole = params.get("role") || "student";
+    currentChatName = params.get("name") || "User";
+    showChat(currentChatRoom, currentChatRole, currentChatName);
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+//  DEMO LECTURES
+// ═══════════════════════════════════════════════════════
+async function loadDemos() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/demos`);
+    const json = await res.json();
+    renderDemos(json.data || []);
+  } catch {
+    // Fallback to default if backend not running
+    renderDemos([
+      { youtubeId:"I9jTplal_NA", youtubeUrl:"https://youtu.be/I9jTplal_NA", title:"English for Business", instructor:"Dr. Smith Singh (IIT Patna)", tags:["LSRW Skills","75% Attendance"], tagColors:["blue","green"] },
+      { youtubeId:"c--sxACNhvc", youtubeUrl:"https://youtu.be/c--sxACNhvc", title:"Student Review & Campus Tour", instructor:"IIT Patna BS AICS", tags:["Student POV","Campus Life"], tagColors:["yellow","purple"] },
+    ]);
+  }
+}
+
+function renderDemos(demos) {
+  const grid = document.getElementById("demoGrid");
+  if (!demos.length) { grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500"><i class="fas fa-video-slash text-4xl mb-4 block text-slate-600"></i><p>No demo lectures yet. Add from Admin Panel!</p></div>`; return; }
+
+  const colorMap = { blue:"bg-blue-500/20 text-blue-300 border border-blue-500/30", green:"bg-green-500/20 text-green-300 border border-green-500/30", yellow:"bg-yellow-500/20 text-yellow-300 border border-yellow-500/30", purple:"bg-purple-500/20 text-purple-300 border border-purple-500/30", red:"bg-red-500/20 text-red-300 border border-red-500/30" };
+
+  grid.innerHTML = demos.map(d => {
+    const vid = d.youtubeId || extractYoutubeIdFE(d.youtubeUrl || "");
+    // Use mqdefault as fallback — more reliable than maxresdefault
+    const thumb = vid ? `https://img.youtube.com/vi/${vid}/mqdefault.jpg` : "";
+    const tags = (d.tags||[]).map((t,i) => {
+      const col = colorMap[(d.tagColors||[])[i]] || colorMap.blue;
+      return `<span class="text-[10px] px-2 py-1 rounded-full font-bold ${col}">${t}</span>`;
+    }).join("");
+    return `
+    <div class="glass rounded-3xl overflow-hidden card-hover border border-white/10 group">
+      <a href="${d.youtubeUrl||`https://youtu.be/${vid}`}" target="_blank" class="block relative" style="padding-bottom:56.25%;height:0;overflow:hidden">
+        ${vid ? `
+        <img 
+          src="https://img.youtube.com/vi/${vid}/mqdefault.jpg"
+          alt="${d.title}"
+          class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition"
+          onerror="this.src='https://img.youtube.com/vi/${vid}/default.jpg'"
+        >` : `<div class="absolute inset-0 bg-slate-800 flex items-center justify-center"><i class="fas fa-video text-4xl text-slate-600"></i></div>`}
+        <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition">
+          <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
+            <i class="fas fa-play text-white text-xl ml-1"></i>
+          </div>
+        </div>
+      </a>
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-2">${d.title}</h3>
+        ${d.instructor ? `<p class="text-slate-400 text-sm mb-3">${d.instructor}</p>` : ""}
+        <div class="flex flex-wrap gap-2">${tags}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// Frontend YouTube ID extractor
+function extractYoutubeIdFE(url) {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : "";
+}
+
+// ═══════════════════════════════════════════════════════
+//  MENTORS
+// ═══════════════════════════════════════════════════════
+async function loadMentors() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/mentors`);
+    const json = await res.json();
+    allMentors = json.data || [];
+    renderMentors(allMentors);
+    animateCount("stat-mentors", allMentors.length);
+    animateCount("stat-sessions", allMentors.reduce((s,m)=>s+(m.totalSessions||0),0));
+  } catch {
+    document.getElementById("mentorGrid").innerHTML = `<div class="col-span-full text-center py-12 text-slate-500"><i class="fas fa-exclamation-triangle text-yellow-400 text-3xl mb-4 block"></i><p>Backend start karo: <code class="text-yellow-400">npm run dev</code></p></div>`;
+  }
+}
+
+function animateCount(id, target) {
+  let c=0; const el=document.getElementById(id); const s=Math.ceil(target/30)||1;
+  const t=setInterval(()=>{c=Math.min(c+s,target);el.textContent=c;if(c>=target)clearInterval(t);},40);
+}
+
+function renderMentors(mentors) {
+  const grid = document.getElementById("mentorGrid");
+  if (!mentors.length) { grid.innerHTML=`<div class="col-span-full text-center py-16 text-slate-500"><i class="fas fa-user-slash text-4xl mb-4 block text-slate-600"></i><p>No mentors yet. Be the first!</p></div>`; return; }
+  grid.innerHTML = mentors.map(m => `
+    <div onclick="selectMentor('${m._id}','${m.name}')" id="card-${m._id}"
+         class="mentor-card glass rounded-3xl p-6 border-2 border-white/10 card-hover cursor-pointer transition-all">
+      <div class="relative w-20 h-20 mx-auto mb-5">
+        <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-yellow-400/50">
+          ${m.photo ? `<img src="${m.photo}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-black">${m.name[0]}</div>`}
+        </div>
+        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-[#0d1424]"></div>
+      </div>
+      <h3 class="font-black text-lg text-center mb-1">${m.name}</h3>
+      <p class="text-yellow-400 text-xs font-bold text-center mb-1">${m.year}</p>
+      <p class="text-slate-500 text-xs text-center mb-4">${m.college}</p>
+      <div class="flex flex-wrap gap-1 justify-center mb-4">
+        ${(m.specialization||"").split(",").slice(0,2).map(s=>`<span class="bg-blue-500/20 text-blue-300 text-[10px] px-2 py-1 rounded-full border border-blue-500/30 font-bold">${s.trim()}</span>`).join("")}
+      </div>
+      ${m.bio?`<p class="text-slate-500 text-xs text-center leading-relaxed mb-4 line-clamp-2">${m.bio}</p>`:""}
+      <div class="flex justify-between text-xs text-slate-500 border-t border-white/10 pt-4">
+        <span>⭐ ${(m.rating||5).toFixed(1)}</span>
+        <span>${m.totalSessions||0} sessions</span>
+        <span class="text-yellow-400 font-bold">₹50</span>
+      </div>
+    </div>`).join("");
+}
+
+function filterMentors(f, btn) {
+  document.querySelectorAll(".filter-btn").forEach(b=>{b.classList.remove("tab-active");b.classList.add("text-slate-400");});
+  btn.classList.add("tab-active"); btn.classList.remove("text-slate-400");
+  renderMentors(f==="all"?allMentors:allMentors.filter(m=>(m.specialization||"").toLowerCase().includes(f.toLowerCase())));
+}
+
+function selectMentor(id, name) {
+  selectedMentorId = id;
+  document.querySelectorAll(".mentor-card").forEach(c=>c.classList.remove("mentor-selected"));
+  document.getElementById("card-"+id).classList.add("mentor-selected");
+  document.getElementById("selectedMentorName").textContent = name;
+  const p = document.getElementById("bookingPanel");
+  p.classList.remove("hidden");
+  p.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+
+// ═══════════════════════════════════════════════════════
+//  BOOKING + RAZORPAY
+// ═══════════════════════════════════════════════════════
+async function initiateBooking() {
+  const name=document.getElementById("bkName").value.trim(), email=document.getElementById("bkEmail").value.trim(), phone=document.getElementById("bkPhone").value.trim(), query=document.getElementById("bkQuery").value.trim();
+  if(!name||!email||!phone){alert("Bhai sab fields bhar!"); return;}
+
+  const btn=document.getElementById("bookBtn");
+  btn.innerHTML=`<i class="fas fa-spinner spinner mr-2"></i> Processing...`; btn.disabled=true;
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/bookings`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mentorId:selectedMentorId,studentName:name,studentEmail:email,studentWhatsapp:phone,query})});
+    const data = await res.json();
+    if(!data.success) throw new Error(data.message);
+    currentMongoId = data.mongoId;
+
+    const rzp = new Razorpay({
+      key: RAZORPAY_KEY, amount: data.amount, currency: data.currency,
+      order_id: data.razorpayOrderId, name:"IITP Navigator", description:"Mentor Consultation",
+      prefill:{name,email,contact:"91"+phone}, theme:{color:"#facc15"},
+      handler: function() { showPaymentSuccess(); startPolling(currentMongoId, name); },
+      modal: { ondismiss: function(){ btn.innerHTML=`<i class="fas fa-calendar-check mr-2"></i> Proceed to Pay ₹50`; btn.disabled=false; } }
+    });
+    rzp.open();
+  } catch(err){
+    alert("Error: "+err.message);
+    btn.innerHTML=`<i class="fas fa-calendar-check mr-2"></i> Proceed to Pay ₹50`; btn.disabled=false;
+  }
+}
+
+function showPaymentSuccess() {
+  document.getElementById("bookingPanel").classList.add("hidden");
+  document.getElementById("paymentSuccess").classList.remove("hidden");
+  document.getElementById("paymentSuccess").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+let successChatRoom=null, successStudentName=null, successMeetLink=null;
+
+function startPolling(mongoId, studentName) {
+  if(pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async()=>{
+    try {
+      const res=await fetch(`${API_BASE}/api/bookings/${mongoId}/status`);
+      const d=await res.json();
+      if(d.confirmed && d.meetLink) {
+        clearInterval(pollInterval);
+        successChatRoom   = d.chatRoomId;
+        successStudentName= studentName;
+        successMeetLink   = d.meetLink;
+        document.getElementById("waitingSpinner").classList.add("hidden");
+        document.getElementById("successLinks").classList.remove("hidden");
+        document.getElementById("meetLinkText").textContent = d.meetLink;
+        document.getElementById("meetLinkBtn").href = d.meetLink;
+      }
+    } catch {}
+  }, 5000);
+  setTimeout(()=>clearInterval(pollInterval), 30*60*1000);
+}
+
+function openChatFromSuccess() {
+  if(successChatRoom) showChat(successChatRoom,"student",successStudentName||"Student");
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHAT SYSTEM
+// ═══════════════════════════════════════════════════════
+async function showChat(roomId, role, name) {
+  currentChatRoom = roomId; currentChatRole = role; currentChatName = name;
+  document.getElementById("chatModal").classList.remove("hidden");
+  document.getElementById("chatModal").classList.add("flex");
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/chat/${roomId}`);
+    const data = await res.json();
+    if(data.success) {
+      const partner = role==="student" ? data.mentor : { name: data.studentName };
+      const partnerName = role==="student" ? data.mentor?.name : data.studentName;
+      document.getElementById("chatPartnerName").textContent = partnerName||"Partner";
+
+      const avatar = document.getElementById("chatAvatar");
+      if(role==="student" && data.mentor?.photo) {
+        avatar.innerHTML = `<img src="${data.mentor.photo}" class="w-full h-full object-cover">`;
+      } else {
+        avatar.textContent = (partnerName||"P")[0].toUpperCase();
+      }
+      if(successMeetLink) document.getElementById("chatMeetLink").href = successMeetLink;
+    }
+  } catch {}
+
+  loadMessages();
+  if(chatPollInterval) clearInterval(chatPollInterval);
+  chatPollInterval = setInterval(loadMessages, 4000);
+
+  // Mark read
+  try { await fetch(`${API_BASE}/api/chat/${roomId}/read`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({readerType:role})}); } catch {}
+}
+
+async function loadMessages() {
+  if(!currentChatRoom) return;
+  try {
+    const res  = await fetch(`${API_BASE}/api/chat/${currentChatRoom}/messages`);
+    const data = await res.json();
+    if(!data.success) return;
+    if(data.data.length === lastMsgCount) return; // no new messages
+    lastMsgCount = data.data.length;
+    renderMessages(data.data);
+  } catch {}
+}
+
+function renderMessages(msgs) {
+  const box = document.getElementById("chatMessages");
+  if(!msgs.length) { box.innerHTML=`<div class="text-center text-slate-500 py-12"><i class="fas fa-comments text-4xl mb-3 block text-slate-600"></i><p>No messages yet.<br>Say hi! 👋</p></div>`; return; }
+  box.innerHTML = msgs.map(m => {
+    const isMe = m.senderType === currentChatRole;
+    const time = new Date(m.createdAt).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+    return `
+    <div class="flex ${isMe?"justify-end":"justify-start"} msg-in">
+      <div class="max-w-xs lg:max-w-md">
+        ${!isMe?`<p class="text-xs text-slate-500 mb-1 ml-1">${m.senderName}</p>`:""}
+        <div class="${isMe?"chat-bubble-student":"chat-bubble-mentor"} px-4 py-3">
+          <p class="text-sm leading-relaxed">${m.message}</p>
+          <p class="text-[10px] ${isMe?"text-blue-200":"text-slate-500"} mt-1 text-right">${time} ${isMe&&m.isRead?"✓✓":""}</p>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const msg   = input.value.trim();
+  if(!msg || !currentChatRoom) return;
+  input.value = "";
+  try {
+    await fetch(`${API_BASE}/api/chat/${currentChatRoom}/messages`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({senderType:currentChatRole,senderName:currentChatName,message:msg})});
+    loadMessages();
+  } catch {}
+}
+
+function hideChat() {
+  document.getElementById("chatModal").classList.add("hidden");
+  document.getElementById("chatModal").classList.remove("flex");
+  if(chatPollInterval) clearInterval(chatPollInterval);
+}
+
+// ═══════════════════════════════════════════════════════
+//  MENTOR REGISTRATION + PHOTO
+// ═══════════════════════════════════════════════════════
+function previewPhoto(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  // Max 2MB
+  if(file.size > 2*1024*1024) { alert("Photo 2MB se choti honi chahiye!"); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    document.getElementById("mPhoto").value = base64;
+    const preview = document.getElementById("photoPreview");
+    preview.innerHTML = `<img src="${base64}" class="w-full h-full object-cover">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function registerMentor() {
+  const name=document.getElementById("mName").value.trim(), email=document.getElementById("mEmail").value.trim(),
+        phone=document.getElementById("mPhone").value.trim(), year=document.getElementById("mYear").value,
+        spec=document.getElementById("mSpec").value.trim(), bio=document.getElementById("mBio").value.trim(),
+        photo=document.getElementById("mPhoto").value,
+        courses=document.getElementById("mCourses").value.trim().split(",").map(c=>c.trim()).filter(Boolean);
+  if(!name||!email||!phone||!spec){alert("Starred fields fill kar!"); return;}
+
+  const btn=document.getElementById("regBtn");
+  btn.innerHTML=`<i class="fas fa-spinner spinner mr-2"></i> Registering...`; btn.disabled=true;
+
+  try {
+    const res=await fetch(`${API_BASE}/api/mentors/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,email,whatsapp:phone,year,specialization:spec,bio,courses,photo})});
+    const data=await res.json();
+    const msg=document.getElementById("regMsg"); msg.classList.remove("hidden");
+    if(data.success) { msg.className="mt-4 p-4 rounded-xl text-center font-bold bg-green-500/20 text-green-300 border border-green-500/30"; msg.textContent="🎉 Profile LIVE! Check your email!"; loadMentors(); }
+    else { msg.className="mt-4 p-4 rounded-xl text-center font-bold bg-red-500/20 text-red-300 border border-red-500/30"; msg.textContent="❌ "+data.message; btn.innerHTML=`<i class="fas fa-rocket mr-2"></i> Register & Go Live`; btn.disabled=false; }
+  } catch { alert("Network error!"); btn.innerHTML=`<i class="fas fa-rocket mr-2"></i> Register & Go Live`; btn.disabled=false; }
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN PANEL
+// ═══════════════════════════════════════════════════════
+function showAdmin() { document.getElementById("adminModal").classList.remove("hidden"); document.getElementById("adminModal").classList.add("flex"); adminTab("bookings"); }
+function hideAdmin() { document.getElementById("adminModal").classList.add("hidden"); document.getElementById("adminModal").classList.remove("flex"); }
+
+function adminTab(tab) {
+  ["bookings","demos","mentors"].forEach(t=>{
+    document.getElementById("apanel-"+t).classList.add("hidden");
+    const btn=document.getElementById("atab-"+t); btn.classList.remove("tab-active"); btn.classList.add("text-slate-400","glass","border","border-white/10");
+  });
+  document.getElementById("apanel-"+tab).classList.remove("hidden");
+  const active=document.getElementById("atab-"+tab); active.classList.add("tab-active"); active.classList.remove("text-slate-400","glass","border","border-white/10");
+  if(tab==="bookings") loadAdminBookings();
+  if(tab==="demos")    loadAdminDemos();
+  if(tab==="mentors")  loadAdminMentors();
+}
+
+// Bookings
+async function loadAdminBookings() {
+  try {
+    const res=await fetch(`${API_BASE}/api/admin/bookings`); const data=await res.json();
+    const list=document.getElementById("adminBookingList");
+    if(!data.data?.length){list.innerHTML=`<p class="text-slate-400 text-center py-8">No bookings yet.</p>`;return;}
+    list.innerHTML=data.data.map(b=>`
+      <div class="glass rounded-2xl p-5 border ${b.paymentConfirmed?"border-green-500/30":"border-yellow-500/30"} mb-3">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+          <div>
+            <span class="text-xs font-bold ${b.paymentConfirmed?"text-green-400":"text-yellow-400"} uppercase tracking-widest">${b.paymentConfirmed?"✅ CONFIRMED":"⏳ PENDING"}</span>
+            <p class="font-black text-lg mt-1">${b.studentName}</p>
+            <p class="text-slate-400 text-sm">${b.studentEmail} · +91${b.studentWhatsapp}</p>
+            <p class="text-slate-500 text-xs mt-1">Mentor: <b>${b.mentorId?.name||"—"}</b> · #${b.bookingId}</p>
+            ${b.query?`<p class="text-slate-500 text-xs mt-1">Query: ${b.query}</p>`:""}
+            ${b.meetLink?`<p class="text-green-400 text-xs mt-1 truncate max-w-xs">🎥 ${b.meetLink}</p>`:""}
+            ${b.chatRoomId&&b.paymentConfirmed?`<button onclick="showChat('${b.chatRoomId}','mentor','Admin')" class="text-xs text-purple-400 mt-1 hover:text-purple-300">💬 View Chat</button>`:""}
+          </div>
+          ${!b.paymentConfirmed?`<button onclick="manualConfirm('${b._id}',this)" class="bg-green-600 hover:bg-green-500 transition px-5 py-2.5 rounded-xl font-bold text-sm"><i class="fas fa-check mr-1"></i>Confirm ₹50</button>`:`<span class="bg-green-500/20 text-green-300 px-4 py-2 rounded-xl text-sm font-bold">Done ✓</span>`}
+        </div>
+      </div>`).join("");
+  } catch { document.getElementById("adminBookingList").innerHTML=`<p class="text-red-400 text-center">Backend connected?</p>`; }
+}
+
+async function manualConfirm(id, btn) {
+  btn.innerHTML=`<i class="fas fa-spinner spinner mr-1"></i>`; btn.disabled=true;
+  try { const res=await fetch(`${API_BASE}/api/admin/bookings/${id}/confirm`,{method:"POST"}); const d=await res.json(); if(d.success) loadAdminBookings(); else{alert("Error: "+d.message);btn.disabled=false;} } catch{alert("Error");btn.disabled=false;}
+}
+
+// Demo Lectures
+async function addDemo() {
+  const title=document.getElementById("dTitle").value.trim(), instructor=document.getElementById("dInstructor").value.trim(),
+        youtubeUrl=document.getElementById("dUrl").value.trim(), tagsRaw=document.getElementById("dTags").value.trim(),
+        colorsRaw=document.getElementById("dColors").value.trim(), order=parseInt(document.getElementById("dOrder").value)||0;
+  if(!title||!youtubeUrl){alert("Title aur YouTube URL daalo!");return;}
+  const tags=tagsRaw?tagsRaw.split(",").map(t=>t.trim()).filter(Boolean):[];
+  const tagColors=colorsRaw?colorsRaw.split(",").map(c=>c.trim().toLowerCase()).filter(Boolean):[];
+
+  const btn=document.getElementById("addDemoBtn"); btn.innerHTML=`<i class="fas fa-spinner spinner mr-2"></i> Adding...`; btn.disabled=true;
+  try {
+    const res=await fetch(`${API_BASE}/api/admin/demos`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title,instructor,youtubeUrl,tags,tagColors,order})});
+    const data=await res.json();
+    const msg=document.getElementById("demoMsg"); msg.classList.remove("hidden");
+    if(data.success){
+      msg.className="mt-3 p-3 rounded-xl text-sm font-bold text-center bg-green-500/20 text-green-300 border border-green-500/30";
+      msg.textContent="✅ Demo lecture added! Refreshing...";
+      // Clear form
+      ["dTitle","dInstructor","dUrl","dTags","dColors"].forEach(id=>document.getElementById(id).value="");
+      document.getElementById("dOrder").value="0";
+      loadAdminDemos(); loadDemos(); // refresh public too
+    } else { msg.className="mt-3 p-3 rounded-xl text-sm font-bold text-center bg-red-500/20 text-red-300 border border-red-500/30"; msg.textContent="❌ "+data.message; }
+    btn.innerHTML=`<i class="fas fa-plus mr-2"></i> Add Demo Lecture`; btn.disabled=false;
+  } catch { alert("Error!"); btn.innerHTML=`<i class="fas fa-plus mr-2"></i> Add Demo Lecture`; btn.disabled=false; }
+}
+
+async function loadAdminDemos() {
+  try {
+    const res=await fetch(`${API_BASE}/api/admin/demos`); const data=await res.json();
+    const list=document.getElementById("adminDemoList");
+    if(!data.data?.length){list.innerHTML=`<p class="text-slate-400 text-center py-8">No demos added yet.</p>`;return;}
+    list.innerHTML=`<div class="space-y-3">${data.data.map(d=>{
+      const vid=d.youtubeId||extractYoutubeIdFE(d.youtubeUrl||"");
+      return `
+      <div class="glass rounded-2xl p-4 border ${d.isActive?"border-green-500/20":"border-red-500/20"} flex items-center gap-4">
+        ${vid?`<img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" class="w-24 h-14 object-cover rounded-xl flex-shrink-0 bg-slate-800" onerror="this.src='https://img.youtube.com/vi/${vid}/default.jpg'">`:`<div class="w-24 h-14 bg-slate-800 rounded-xl flex-shrink-0 flex items-center justify-center"><i class="fas fa-video text-slate-600"></i></div>`}
+        <div class="flex-1 min-w-0">
+          <p class="font-bold truncate">${d.title}</p>
+          <p class="text-slate-400 text-xs">${d.instructor||""}</p>
+          <p class="text-slate-500 text-xs mt-1">Tags: ${(d.tags||[]).join(", ")||"none"} · Order: ${d.order}</p>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+          <button onclick="toggleDemo('${d._id}',${!d.isActive})" class="text-xs px-3 py-1.5 rounded-lg font-bold ${d.isActive?"bg-red-500/20 text-red-300 hover:bg-red-500/40":"bg-green-500/20 text-green-300 hover:bg-green-500/40"} transition">
+            ${d.isActive?"Hide":"Show"}
+          </button>
+          <button onclick="deleteDemo('${d._id}')" class="text-xs px-3 py-1.5 rounded-lg font-bold bg-red-600/20 text-red-400 hover:bg-red-600/40 transition">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    }).join("")}</div>`;
+  } catch { document.getElementById("adminDemoList").innerHTML=`<p class="text-red-400 text-center">Error loading demos.</p>`; }
+}
+
+async function toggleDemo(id, isActive) {
+  try { await fetch(`${API_BASE}/api/admin/demos/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({isActive})}); loadAdminDemos(); loadDemos(); } catch{}
+}
+
+async function deleteDemo(id) {
+  if(!confirm("Delete this demo?")) return;
+  try { await fetch(`${API_BASE}/api/admin/demos/${id}`,{method:"DELETE"}); loadAdminDemos(); loadDemos(); } catch{}
+}
+
+// Admin Mentors
+async function loadAdminMentors() {
+  try {
+    const res=await fetch(`${API_BASE}/api/admin/mentors`); const data=await res.json();
+    const list=document.getElementById("adminMentorList");
+    if(!data.data?.length){list.innerHTML=`<p class="text-slate-400 text-center py-8">No mentors yet.</p>`;return;}
+    list.innerHTML=`<div class="space-y-3">${data.data.map(m=>`
+      <div class="glass rounded-2xl p-4 border border-white/10 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full overflow-hidden border border-white/20 flex-shrink-0">
+          ${m.photo?`<img src="${m.photo}" class="w-full h-full object-cover">`:`<div class="w-full h-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center font-black">${m.name[0]}</div>`}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold">${m.name}</p>
+          <p class="text-slate-400 text-xs">${m.email} · ${m.year} · ${m.totalSessions||0} sessions</p>
+          <p class="text-slate-500 text-xs">${m.specialization}</p>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+          <span class="text-xs px-2 py-1 rounded-lg ${m.isAvailable?"bg-green-500/20 text-green-300":"bg-red-500/20 text-red-300"}">${m.isAvailable?"Active":"Hidden"}</span>
+          <button onclick="deleteMentor('${m._id}')" class="text-xs px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/40 transition"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>`).join("")}</div>`;
+  } catch { document.getElementById("adminMentorList").innerHTML=`<p class="text-red-400 text-center">Error.</p>`; }
+}
+
+async function deleteMentor(id) {
+  if(!confirm("Delete this mentor?")) return;
+  try { await fetch(`${API_BASE}/api/admin/mentors/${id}`,{method:"DELETE"}); loadAdminMentors(); loadMentors(); } catch{}
+}
+
+// ═══════════════════════════════════════════════════════
+//  ROI + TIME CALCULATORS
+// ═══════════════════════════════════════════════════════
+function setTier(el,tier) {
+  currentTier=tier;
+  document.querySelectorAll(".tier-btn").forEach(b=>{b.classList.remove("border-yellow-400","bg-yellow-400/10");b.classList.add("border-white/20");});
+  el.classList.add("border-yellow-400","bg-yellow-400/10"); el.classList.remove("border-white/20"); updateROI();
+}
+
+function updateROI() {
+  const study=parseInt(document.getElementById("studySlider")?.value||3);
+  document.getElementById("studyVal").textContent=study+" hrs/day";
+  const c={"3":{cur:"₹3-5 LPA",nw:"₹12-18 LPA",emoji:"🚀 Massive ROI",comment:"Best decision of your life!",cP:15,nP:75,tl:"~6 months",tlP:80},"5":{cur:"₹5-8 LPA",nw:"₹15-22 LPA",emoji:"📈 High ROI",comment:"Great add-on to your degree!",cP:25,nP:85,tl:"~8 months",tlP:65},"8":{cur:"₹8-12 LPA",nw:"₹18-30 LPA",emoji:"💡 Skill Boost",comment:"IIT skills will land MAANG!",cP:40,nP:95,tl:"~10 months",tlP:50}}[currentTier]||{};
+  document.getElementById("roiMain").textContent=c.nw||""; document.getElementById("curPath").textContent=c.cur||"";
+  document.getElementById("newPath").textContent=c.nw||""; document.getElementById("roiTimeline").textContent=c.tl||"";
+  document.getElementById("curBar").style.width=(c.cP||0)+"%"; document.getElementById("newBar").style.width=(c.nP||0)+"%";
+  document.getElementById("roiBar").style.width=(c.tlP||0)+"%"; document.getElementById("roiEmoji").textContent=c.emoji||"";
+  document.getElementById("roiComment").textContent=c.comment||"";
+}
+
+function updateTime() {
+  const off=parseInt(document.getElementById("offSlider").value), sleep=parseInt(document.getElementById("sleepSlider").value), travel=parseInt(document.getElementById("travelSlider").value);
+  const free=24-off-sleep-travel;
+  document.getElementById("offVal").textContent=off+" hrs"; document.getElementById("sleepVal").textContent=sleep+" hrs"; document.getElementById("travelVal").textContent=travel+" hrs";
+  document.getElementById("lbl-college").textContent=off+" hrs"; document.getElementById("lbl-sleep").textContent=sleep+" hrs"; document.getElementById("lbl-travel").textContent=travel+" hrs"; document.getElementById("lbl-free").textContent=Math.max(free,0)+" hrs";
+  const pct=v=>Math.max(0,Math.min(100,(v/24)*100))+"%";
+  document.getElementById("bar-college").style.width=pct(off); document.getElementById("bar-sleep").style.width=pct(sleep); document.getElementById("bar-travel").style.width=pct(travel); document.getElementById("bar-free").style.width=pct(Math.max(free,0));
+  const r=document.getElementById("freeTimeResult"),v=document.getElementById("timeVerdict"),rec=document.getElementById("courseRec");
+  r.textContent=Math.max(free,0)+" hrs free";
+  if(free>=6){r.className="text-4xl font-black text-green-400";v.className="font-bold mt-1 text-green-300";v.textContent="Excellent! Take 4 courses";rec.textContent="Recommended: 4 courses/semester";}
+  else if(free>=3){r.className="text-4xl font-black text-yellow-400";v.className="font-bold mt-1 text-yellow-300";v.textContent="Good. Take 2-3 courses";rec.textContent="Recommended: 2-3 courses";}
+  else if(free>=1){r.className="text-4xl font-black text-orange-400";v.className="font-bold mt-1 text-orange-300";v.textContent="Tight! Max 1 course";rec.textContent="Tip: Start in summer break";}
+  else{r.className="text-4xl font-black text-red-400";v.className="font-bold mt-1 text-red-300";v.textContent="⚠️ Schedule too full";rec.textContent="Reduce offline load first";}
+}
+
+function switchTab(tab) {
+  ["roi","time","compare"].forEach(t=>{document.getElementById("panel-"+t).classList.add("hidden");document.getElementById("tab-"+t).classList.remove("tab-active");document.getElementById("tab-"+t).classList.add("text-slate-400");});
+  document.getElementById("panel-"+tab).classList.remove("hidden"); document.getElementById("tab-"+tab).classList.add("tab-active"); document.getElementById("tab-"+tab).classList.remove("text-slate-400");
+  if(tab==="roi") updateROI(); if(tab==="time") updateTime();
+}
+</script>
+</body>
+</html>
