@@ -14,7 +14,10 @@ const { google } = require("googleapis");
 
 const app = express();
 app.use("/api/razorpay-webhook", express.raw({ type: "application/json" }));
-app.use(cors());
+app.use(cors({
+  origin: ["https://animated-unicorn-616a3a.netlify.app", "http://localhost:5000"],
+  credentials: true
+}));
 app.use(express.json({ limit: "10mb" }));
 
 // ── MongoDB ──────────────────────────────────────────────
